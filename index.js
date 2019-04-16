@@ -551,8 +551,7 @@ function isOnSegment(segment, point) {
   var sqLength = distance(segment[0], segment[1]);
   var sqDistToStart = distance(segment[0], point);
   var sqDistToEnd = distance(segment[1], point);
-  var d = sqDistToStart + sqDistToEnd;
-  return sqLength === d;
+  return Math.abs(sqLength - (sqDistToStart + sqDistToEnd)) < Number.EPSILON;
 }
 
 function intersectsLine(node, line) {
