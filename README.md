@@ -1,10 +1,9 @@
-RBush
-=====
+# RBush
 
-RBush is a high-performance JavaScript library for 2D **spatial indexing** of points and rectangles.
+RBush is a high-performance JavaScript library for 2D **spatial indexing** of points and rectangles. This version supports polylines.
 It's based on an optimized **R-tree** data structure with **bulk insertion** support.
 
-*Spatial index* is a special data structure for points and rectangles
+_Spatial index_ is a special data structure for points and rectangles
 that allows you to perform queries like "all items within this bounding box" very efficiently
 (e.g. hundreds of times faster than looping over all items).
 It's most commonly used in maps and data visualizations.
@@ -19,8 +18,8 @@ Open web console to see benchmarks;
 click on buttons to insert or remove items;
 click to perform search under the cursor.
 
-* [randomly clustered data](http://mourner.github.io/rbush/viz/viz-cluster.html)
-* [uniformly distributed random data](http://mourner.github.io/rbush/viz/viz-uniform.html)
+- [randomly clustered data](http://mourner.github.io/rbush/viz/viz-cluster.html)
+- [uniformly distributed random data](http://mourner.github.io/rbush/viz/viz-uniform.html)
 
 ## Install
 
@@ -46,15 +45,29 @@ var tree = rbush(16);
 
 ### Adding Data
 
-Insert an item:
+Insert a point/rectangle item:
 
 ```js
 var item = {
-    minX: 20,
-    minY: 40,
-    maxX: 30,
-    maxY: 50,
-    foo: 'bar'
+  minX: 20,
+  minY: 40,
+  maxX: 30,
+  maxY: 50,
+  foo: 'bar'
+};
+tree.insert(item);
+```
+
+Insert a polyline item:
+
+```js
+var item = {
+  minX: 20,
+  minY: 40,
+  maxX: 30,
+  maxY: 50,
+  type: 'line', // default is 'point'
+  foo: 'bar'
 };
 tree.insert(item);
 ```
@@ -74,8 +87,8 @@ However, you can pass a custom `equals` function to compare by value for removal
 which is useful when you only have a copy of the object you need removed (e.g. loaded from server):
 
 ```js
-tree.remove(itemCopy, function (a, b) {
-    return a.id === b.id;
+tree.remove(itemCopy, function(a, b) {
+  return a.id === b.id;
 });
 ```
 
@@ -122,14 +135,14 @@ but makes query performance worse if the data is scattered.
 
 ```js
 var result = tree.search({
-    minX: 40,
-    minY: 20,
-    maxX: 80,
-    maxY: 70
+  minX: 40,
+  minY: 20,
+  maxX: 80,
+  maxY: 70
 });
 ```
 
-Returns an array of data items (points or rectangles) that the given bounding box intersects.
+Returns an array of data items (points, rectangles or polylines) that the given bounding box intersects.
 
 Note that the `search` method accepts a bounding box in `{minX, minY, maxX, maxY}` format
 regardless of the format specified in the constructor (which only affects inserted objects).
@@ -143,11 +156,10 @@ Returns all items of the tree.
 ### Collisions
 
 ```js
-var result = tree.collides({minX: 40, minY: 20, maxX: 80, maxY: 70});
+var result = tree.collides({ minX: 40, minY: 20, maxX: 80, maxY: 70 });
 ```
 
 Returns `true` if there are any items intersecting the given bounding box, otherwise `false`.
-
 
 ### Export and Import
 
@@ -176,30 +188,30 @@ random uniformly distributed rectangles of ~0.01% area and setting `maxEntries` 
 (see `debug/perf.js` script).
 Performed with Node.js v6.2.2 on a Retina Macbook Pro 15 (mid-2012).
 
-Test                         | RBush  | [old RTree](https://github.com/imbcmdth/RTree) | Improvement
----------------------------- | ------ | ------ | ----
-insert 1M items one by one   | 3.18s  | 7.83s  | 2.5x
-1000 searches of 0.01% area  | 0.03s  | 0.93s  | 30x
-1000 searches of 1% area     | 0.35s  | 2.27s  | 6.5x
-1000 searches of 10% area    | 2.18s  | 9.53s  | 4.4x
-remove 1000 items one by one | 0.02s  | 1.18s  | 50x
-bulk-insert 1M items         | 1.25s  | n/a    | 6.7x
+| Test                         | RBush | [old RTree](https://github.com/imbcmdth/RTree) | Improvement |
+| ---------------------------- | ----- | ---------------------------------------------- | ----------- |
+| insert 1M items one by one   | 3.18s | 7.83s                                          | 2.5x        |
+| 1000 searches of 0.01% area  | 0.03s | 0.93s                                          | 30x         |
+| 1000 searches of 1% area     | 0.35s | 2.27s                                          | 6.5x        |
+| 1000 searches of 10% area    | 2.18s | 9.53s                                          | 4.4x        |
+| remove 1000 items one by one | 0.02s | 1.18s                                          | 50x         |
+| bulk-insert 1M items         | 1.25s | n/a                                            | 6.7x        |
 
 ## Algorithms Used
 
-* single insertion: non-recursive R-tree insertion with overlap minimizing split routine from R\*-tree (split is very effective in JS, while other R\*-tree modifications like reinsertion on overflow and overlap minimizing subtree search are too slow and not worth it)
-* single deletion: non-recursive R-tree deletion using depth-first tree traversal with free-at-empty strategy (entries in underflowed nodes are not reinserted, instead underflowed nodes are kept in the tree and deleted only when empty, which is a good compromise of query vs removal performance)
-* bulk loading: OMT algorithm (Overlap Minimizing Top-down Bulk Loading) combined with Floyd–Rivest selection algorithm
-* bulk insertion: STLT algorithm (Small-Tree-Large-Tree)
-* search: standard non-recursive R-tree search
+- single insertion: non-recursive R-tree insertion with overlap minimizing split routine from R\*-tree (split is very effective in JS, while other R\*-tree modifications like reinsertion on overflow and overlap minimizing subtree search are too slow and not worth it)
+- single deletion: non-recursive R-tree deletion using depth-first tree traversal with free-at-empty strategy (entries in underflowed nodes are not reinserted, instead underflowed nodes are kept in the tree and deleted only when empty, which is a good compromise of query vs removal performance)
+- bulk loading: OMT algorithm (Overlap Minimizing Top-down Bulk Loading) combined with Floyd–Rivest selection algorithm
+- bulk insertion: STLT algorithm (Small-Tree-Large-Tree)
+- search: standard non-recursive R-tree search
 
 ## Papers
 
-* [R-trees: a Dynamic Index Structure For Spatial Searching](http://www-db.deis.unibo.it/courses/SI-LS/papers/Gut84.pdf)
-* [The R*-tree: An Efficient and Robust Access Method for Points and Rectangles+](http://dbs.mathematik.uni-marburg.de/publications/myPapers/1990/BKSS90.pdf)
-* [OMT: Overlap Minimizing Top-down Bulk Loading Algorithm for R-tree](http://ftp.informatik.rwth-aachen.de/Publications/CEUR-WS/Vol-74/files/FORUM_18.pdf)
-* [Bulk Insertions into R-Trees Using the Small-Tree-Large-Tree Approach](http://www.cs.arizona.edu/~bkmoon/papers/dke06-bulk.pdf)
-* [R-Trees: Theory and Applications (book)](http://www.apress.com/9781852339777)
+- [R-trees: a Dynamic Index Structure For Spatial Searching](http://www-db.deis.unibo.it/courses/SI-LS/papers/Gut84.pdf)
+- [The R\*-tree: An Efficient and Robust Access Method for Points and Rectangles+](http://dbs.mathematik.uni-marburg.de/publications/myPapers/1990/BKSS90.pdf)
+- [OMT: Overlap Minimizing Top-down Bulk Loading Algorithm for R-tree](http://ftp.informatik.rwth-aachen.de/Publications/CEUR-WS/Vol-74/files/FORUM_18.pdf)
+- [Bulk Insertions into R-Trees Using the Small-Tree-Large-Tree Approach](http://www.cs.arizona.edu/~bkmoon/papers/dke06-bulk.pdf)
+- [R-Trees: Theory and Applications (book)](http://www.apress.com/9781852339777)
 
 ## Development
 
