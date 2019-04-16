@@ -64,8 +64,10 @@ tree.insert(item);
 Remove a previously inserted item:
 
 ```js
-tree.remove(item);
+const result = tree.remove(item);
 ```
+
+Returns `true` if the item is successfully removed from the tree, otherwise - `false`.
 
 By default, RBush removes objects by reference.
 However, you can pass a custom `equals` function to compare by value for removal,
