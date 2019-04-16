@@ -128,7 +128,7 @@ rbush.prototype = {
     },
 
     remove: function (item, equalsFn) {
-        if (!item) return this;
+        if (!item) return false;
 
         var node = this.data,
             bbox = this.toBBox(item),
@@ -154,7 +154,7 @@ rbush.prototype = {
                     node.children.splice(index, 1);
                     path.push(node);
                     this._condense(path);
-                    return this;
+                    return true;
                 }
             }
 
@@ -173,7 +173,7 @@ rbush.prototype = {
             } else node = null; // nothing found
         }
 
-        return this;
+        return false;
     },
 
     toBBox: function (item) { return item; },

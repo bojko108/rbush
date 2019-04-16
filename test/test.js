@@ -326,13 +326,12 @@ t('#remove removes items correctly', function (t) {
 });
 t('#remove does nothing if nothing found', function (t) {
     t.same(
-        rbush().load(data),
+        false,
         rbush().load(data).remove([13, 13, 13, 13]));
     t.end();
 });
 t('#remove does nothing if given undefined', function (t) {
-    t.same(
-        rbush().load(data),
+    t.same(false,
         rbush().load(data).remove());
     t.end();
 });
