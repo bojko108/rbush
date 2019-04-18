@@ -8,9 +8,6 @@ that allows you to perform queries like "all items within this bounding box" ver
 (e.g. hundreds of times faster than looping over all items).
 It's most commonly used in maps and data visualizations.
 
-[![Build Status](https://travis-ci.org/mourner/rbush.svg?branch=master)](https://travis-ci.org/mourner/rbush)
-[![](https://img.shields.io/badge/simply-awesome-brightgreen.svg)](https://github.com/mourner/projects)
-
 ## Demos
 
 The demos contain visualization of trees generated from 50k bulk-loaded random points.
@@ -23,16 +20,18 @@ click to perform search under the cursor.
 
 ## Install
 
-Install with NPM (`npm install rbush`), or use CDN links for browsers:
-[rbush.js](https://unpkg.com/rbush@2.0.1/rbush.js),
-[rbush.min.js](https://unpkg.com/rbush@2.0.1/rbush.min.js)
+Install with NPM:
+
+```bash
+npm install bojko108/rbush
+```
 
 ## Usage
 
 ### Creating a Tree
 
 ```js
-var tree = rbush();
+const tree = rbush();
 ```
 
 An optional argument to `rbush` defines the maximum number of entries in a tree node.
@@ -40,7 +39,7 @@ An optional argument to `rbush` defines the maximum number of entries in a tree 
 Higher value means faster insertion and slower search, and vice versa.
 
 ```js
-var tree = rbush(16);
+const tree = rbush(16);
 ```
 
 ### Adding Data
@@ -48,7 +47,7 @@ var tree = rbush(16);
 Insert a point/rectangle item:
 
 ```js
-var item = {
+const item = {
   minX: 20,
   minY: 40,
   maxX: 30,
@@ -61,7 +60,7 @@ tree.insert(item);
 Insert a polyline item:
 
 ```js
-var item = {
+const item = {
   minX: 20,
   minY: 40,
   maxX: 30,
@@ -106,7 +105,7 @@ You can customize this by providing an array with corresponding accessor strings
 as a second argument to `rbush` like this:
 
 ```js
-var tree = rbush(9, ['[0]', '[1]', '[0]', '[1]']); // accept [x, y] points
+const tree = rbush(9, ['[0]', '[1]', '[0]', '[1]']); // accept [x, y] points
 tree.insert([20, 50]);
 ```
 
@@ -134,12 +133,15 @@ but makes query performance worse if the data is scattered.
 ### Search
 
 ```js
-var result = tree.search({
-  minX: 40,
-  minY: 20,
-  maxX: 80,
-  maxY: 70
-});
+const result = tree.search(
+  {
+    minX: 40,
+    minY: 20,
+    maxX: 80,
+    maxY: 70
+  },
+  nodeType
+);
 ```
 
 Returns an array of data items (points, rectangles or polylines) that the given bounding box intersects.
@@ -147,8 +149,10 @@ Returns an array of data items (points, rectangles or polylines) that the given 
 Note that the `search` method accepts a bounding box in `{minX, minY, maxX, maxY}` format
 regardless of the format specified in the constructor (which only affects inserted objects).
 
+By default it searches through all found items, but if the second parameter (`nodeType`) is passed it will return only items for which `item.type === nodeType`. Default value for `nodeType` is `undefined`, meaning any found item will be returned.
+
 ```js
-var allItems = tree.all();
+const allItems = tree.all();
 ```
 
 Returns all items of the tree.
@@ -156,19 +160,29 @@ Returns all items of the tree.
 ### Collisions
 
 ```js
-var result = tree.collides({ minX: 40, minY: 20, maxX: 80, maxY: 70 });
+const result = tree.collides(
+  {
+    minX: 40,
+    minY: 20,
+    maxX: 80,
+    maxY: 70
+  },
+  nodeType
+);
 ```
 
 Returns `true` if there are any items intersecting the given bounding box, otherwise `false`.
+
+By default it checks all found, but if the second parameter (`nodeType`) is passed it will check only items for which `item.type === nodeType`. Default value for `nodeType` is `undefined`, meaning any found item will be checked for collision.
 
 ### Export and Import
 
 ```js
 // export data as JSON object
-var treeData = tree.toJSON();
+const treeData = tree.toJSON();
 
 // import previously exported data
-var tree = rbush(9).fromJSON(treeData);
+const tree = rbush(9).fromJSON(treeData);
 ```
 
 Importing and exporting as JSON allows you to use RBush on both the server (using Node.js) and the browser combined,
