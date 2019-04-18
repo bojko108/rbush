@@ -66,7 +66,7 @@ var item = {
   minY: 40,
   maxX: 30,
   maxY: 50,
-  type: 'line', // default is 'point'
+  type: 'edge', // default is 'undefined'
   foo: 'bar'
 };
 tree.insert(item);

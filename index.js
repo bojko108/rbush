@@ -24,7 +24,7 @@ rbush.prototype = {
     return this._all(this.data, []);
   },
 
-  search: function(bbox) {
+  search: function(bbox, nodeType) {
     var node = this.data,
       result = [],
       toBBox = this.toBBox;
@@ -42,7 +42,12 @@ rbush.prototype = {
         child = node.children[i];
         childBBox = node.leaf ? toBBox(child) : child;
 
-        if (childBBox.type === 'line' && (bbox.minX - bbox.maxX === 0 && bbox.minY - bbox.maxY === 0)) {
+        // continue, we are not searching for this kind of item
+        if (nodeType !== undefined && childBBox.type !== nodeType) {
+          continue;
+        }
+
+        if (childBBox.type === 'edge' && (bbox.minX - bbox.maxX === 0 && bbox.minY - bbox.maxY === 0)) {
           if (intersectsLine(bbox, childBBox)) {
             if (node.leaf) result.push(child);
             else if (contains(bbox, childBBox)) this._all(child, result);
@@ -62,7 +67,7 @@ rbush.prototype = {
     return result;
   },
 
-  collides: function(bbox) {
+  collides: function(bbox, nodeType) {
     var node = this.data,
       toBBox = this.toBBox;
 
@@ -79,7 +84,12 @@ rbush.prototype = {
         child = node.children[i];
         childBBox = node.leaf ? toBBox(child) : child;
 
-        if (childBBox.type === 'line') {
+        // continue, we are not searching for this kind of item
+        if (nodeType !== undefined && childBBox.type !== nodeType) {
+          continue;
+        }
+        
+        if (childBBox.type === 'edge') {
           if (intersectsLine(bbox, childBBox)) {
             if (node.leaf || contains(bbox, childBBox)) return true;
             nodesToSearch.push(child);
